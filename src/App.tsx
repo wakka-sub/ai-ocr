@@ -243,9 +243,9 @@ export default function App() {
       <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow-md text-xl font-semibold">
         AI OCR Web App
       </header>
-      <div className="flex flex-1 overflow-hidden p-6 justify-center items-start gap-8">
+      <div className="flex flex-1 overflow-hidden p-4 gap-4">
         <div
-          className="flex flex-col items-center p-6 space-y-6 bg-white rounded-l-xl shadow-lg flex-none"
+          className="flex flex-col items-center p-4 space-y-4 bg-white rounded-lg shadow flex-none overflow-auto"
           style={{ width: image ? image.width : 'auto' }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
@@ -304,7 +304,7 @@ export default function App() {
             ))}
           </div>
         </div>
-        <div className="w-72 flex-none p-6 bg-white rounded-r-xl shadow-lg flex flex-col overflow-y-auto">
+        <div className="w-80 flex-none p-4 bg-white rounded-lg shadow flex flex-col overflow-y-auto">
           <div className="mb-4 space-x-3 items-center flex">
             <button
               className="bg-blue-500 text-white px-2 py-1 rounded"
