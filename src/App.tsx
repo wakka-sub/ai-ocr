@@ -313,7 +313,6 @@ export default function App() {
               <input
                 type="file"
                 accept="image/*"
-                capture="environment"
                 onChange={(e) => handleFiles(e.target.files)}
                 className="sr-only"
               />
