@@ -18,7 +18,7 @@ export default {
         danger: colors.rose,
       },
       fontFamily: {
-        sans: ['Roboto', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         'headline-small': ['1.5rem', { lineHeight: '2rem', fontWeight: '700' }],
