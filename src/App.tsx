@@ -183,20 +183,15 @@ export default function App() {
     return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ''
   }
 
-  const retry = async <T,>(
-    fn: () => Promise<T>,
-    retries = 2,
-    attempt = 0,
-  ): Promise<T> => {
+  const retry = async <T,>(fn: () => Promise<T>, attempt = 0): Promise<T> => {
     try {
       return await fn()
     } catch (e) {
-      if (retries === 0) throw e
       const status = (e as { status?: number } | undefined)?.status
       const base = status === 429 ? 2000 : 1000
       const delay = base * Math.pow(2, attempt)
       await new Promise((r) => setTimeout(r, delay))
-      return retry(fn, retries - 1, attempt + 1)
+      return retry(fn, attempt + 1)
     }
   }
 
