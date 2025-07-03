@@ -243,9 +243,10 @@ export default function App() {
       <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow-md text-xl font-semibold">
         AI OCR Web App
       </header>
-      <div className="flex flex-1 overflow-hidden p-4 justify-center gap-4">
+      <div className="flex flex-1 overflow-hidden p-4 justify-center items-start gap-6">
         <div
-          className="flex-1 flex flex-col items-center p-4 space-y-4 bg-white rounded-l-xl shadow-lg"
+          className="flex flex-col items-center p-4 space-y-4 bg-white rounded-l-xl shadow-lg flex-none"
+          style={{ width: image ? image.width : 'auto' }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault()
@@ -303,7 +304,7 @@ export default function App() {
             ))}
           </div>
         </div>
-        <div className="w-72 p-4 bg-white rounded-r-xl shadow-lg flex flex-col overflow-y-auto">
+        <div className="w-72 flex-none p-4 bg-white rounded-r-xl shadow-lg flex flex-col overflow-y-auto">
           <div className="mb-4 space-x-2 items-center flex">
             <button
               className="bg-blue-500 text-white px-2 py-1 rounded"
@@ -372,7 +373,7 @@ export default function App() {
                     </button>
                   </div>
                 </div>
-                <pre className="whitespace-pre-wrap text-sm">
+                <pre className="whitespace-pre-wrap break-all text-sm">
                   {r.loading ? '...running...' : r.text}
                 </pre>
               </div>
