@@ -107,6 +107,10 @@ export default function App() {
     )
   }
 
+  const removeRectById = (id: number) => {
+    setRects((prev) => prev.filter((r) => r.id !== id))
+  }
+
   const cropBase64 = (r: Rect) => {
     const canvas = canvasRef.current!
     return cropCanvas(canvas, r.x, r.y, r.width, r.height, r.rotation)
@@ -170,9 +174,21 @@ export default function App() {
 
   return (
     <div className="flex h-screen">
-      <div className="flex-1 flex flex-col items-center justify-center" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files) }}>
+      <div
+        className="flex-1 flex flex-col items-center justify-center"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault()
+          handleFiles(e.dataTransfer.files)
+        }}
+      >
         {!image && (
-          <input type="file" accept="image/*" onChange={(e) => handleFiles(e.target.files)} className="mb-2" />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFiles(e.target.files)}
+            className="mb-2"
+          />
         )}
         <canvas
           ref={canvasRef}
@@ -182,23 +198,53 @@ export default function App() {
           onDoubleClick={removeRect}
           className="border"
         />
-      </div>
-      <div className="w-64 border-l p-2 overflow-y-auto">
-        <button className="bg-blue-500 text-white px-2 py-1 rounded mr-2" onClick={runOCR}>Run OCR</button>
-        <button className="bg-green-500 text-white px-2 py-1 rounded mr-2" onClick={copyResults}>Copy Results</button>
-        <button className="bg-gray-500 text-white px-2 py-1 rounded" onClick={() => setRects([])}>Clear Rects</button>
-        <div className="mt-2 space-y-2">
+        <div className="mt-2 w-full max-h-40 overflow-y-auto space-y-1">
           {rects.map((r) => (
-            <div key={r.id} className="border p-1">
-              <div className="flex items-center justify-between">
-                <span className="font-bold">#{r.id}</span>
+            <div key={r.id} className="flex items-center justify-between text-sm">
+              <span>#{r.id}</span>
+              <div className="space-x-1">
                 <button
                   className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
                   onClick={() => rotateRect(r.id)}
                 >
                   Rotate
                 </button>
+                <button
+                  className="bg-red-500 text-white px-1 py-0.5 rounded text-xs"
+                  onClick={() => removeRectById(r.id)}
+                >
+                  Delete
+                </button>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="w-64 border-l p-2 flex flex-col overflow-y-auto">
+        <div className="mb-2 space-x-2">
+          <button
+            className="bg-blue-500 text-white px-2 py-1 rounded"
+            onClick={runOCR}
+          >
+            Run OCR
+          </button>
+          <button
+            className="bg-green-500 text-white px-2 py-1 rounded"
+            onClick={copyResults}
+          >
+            Copy Results
+          </button>
+          <button
+            className="bg-gray-500 text-white px-2 py-1 rounded"
+            onClick={() => setRects([])}
+          >
+            Clear Rects
+          </button>
+        </div>
+        <div className="space-y-2">
+          {rects.map((r) => (
+            <div key={r.id} className="border p-1">
+              <span className="font-bold">#{r.id}</span>
               <pre className="whitespace-pre-wrap text-sm">{r.text}</pre>
             </div>
           ))}
