@@ -142,7 +142,7 @@ export default function App() {
     setDrawing(null)
   }
 
-  const removeRect = (e: React.PointerEvent) => {
+  const removeRect = (e: React.MouseEvent) => {
     const rect = canvasRef.current!.getBoundingClientRect()
     const { x, y } = getCanvasPoint(e.nativeEvent, rect, scale)
     setRects((prev) =>
