@@ -11,6 +11,7 @@ interface Rect {
   rotation: number
   thumb: string
   text?: string
+  loading?: boolean
 }
 
 const promptText =
@@ -18,10 +19,12 @@ const promptText =
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const baseCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [rects, setRects] = useState<Rect[]>([])
   const [drawing, setDrawing] = useState<Rect | null>(null)
   const [counter, setCounter] = useState(1)
+  const [running, setRunning] = useState(false)
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current
@@ -50,7 +53,14 @@ export default function App() {
   const loadFile = (file: File) => {
     const img = new Image()
     img.crossOrigin = 'anonymous'
-    img.onload = () => setImage(img)
+    img.onload = () => {
+      setImage(img)
+      const off = document.createElement('canvas')
+      off.width = img.width
+      off.height = img.height
+      off.getContext('2d')!.drawImage(img, 0, 0)
+      baseCanvasRef.current = off
+    }
     img.src = URL.createObjectURL(file)
     setRects([])
     setCounter(1)
@@ -66,7 +76,15 @@ export default function App() {
     const rect = canvasRef.current!.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    setDrawing({ id: counter, x, y, width: 0, height: 0, rotation: 0 })
+    setDrawing({
+      id: counter,
+      x,
+      y,
+      width: 0,
+      height: 0,
+      rotation: 0,
+      thumb: '',
+    })
   }
 
   const moveDraw = (e: React.MouseEvent) => {
@@ -126,8 +144,15 @@ export default function App() {
     height: number
     rotation: number
   }) => {
-    const canvas = canvasRef.current!
-    return cropCanvas(canvas, r.x, r.y, r.width, r.height, r.rotation)
+    if (!baseCanvasRef.current) return ''
+    return cropCanvas(
+      baseCanvasRef.current,
+      r.x,
+      r.y,
+      r.width,
+      r.height,
+      r.rotation,
+    )
   }
 
   const fetchOCR = async (imgData: string): Promise<string> => {
@@ -164,10 +189,19 @@ export default function App() {
   }
 
   const runOCR = async () => {
-    const tasks = rects.map((r) => async () => {
+    setRunning(true)
+    const targets = rects.filter((r) => !r.text && !r.loading)
+    setRects((prev) =>
+      prev.map((r) => (targets.includes(r) ? { ...r, loading: true } : r)),
+    )
+    const tasks = targets.map((r) => async () => {
       const base = cropBase64(r)
       const text = await retry(() => fetchOCR(base))
-      setRects((prev) => prev.map((p) => (p.id === r.id ? { ...p, text } : p)))
+      setRects((prev) =>
+        prev.map((p) =>
+          p.id === r.id ? { ...p, text, loading: false } : p,
+        ),
+      )
     })
     let index = 0
     const workers = Array.from(
@@ -180,6 +214,20 @@ export default function App() {
       },
     )
     await Promise.all(workers)
+    setRunning(false)
+  }
+
+  const runOne = async (id: number) => {
+    const target = rects.find((r) => r.id === id)
+    if (!target) return
+    setRects((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, loading: true } : r)),
+    )
+    const base = cropBase64(target)
+    const text = await retry(() => fetchOCR(base))
+    setRects((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, text, loading: false } : r)),
+    )
   }
 
   const copyResults = async () => {
@@ -245,7 +293,7 @@ export default function App() {
         </div>
       </div>
       <div className="w-64 border-l p-2 flex flex-col overflow-y-auto">
-        <div className="mb-2 space-x-2">
+        <div className="mb-2 space-x-2 items-center flex">
           <button
             className="bg-blue-500 text-white px-2 py-1 rounded"
             onClick={runOCR}
@@ -264,20 +312,31 @@ export default function App() {
           >
             Clear Rects
           </button>
+          {running && <span className="ml-2 text-sm">Running...</span>}
         </div>
         <div className="space-y-2">
           {rects.map((r) => (
             <div key={r.id} className="border p-1">
               <div className="flex justify-between items-center mb-1">
                 <span className="font-bold">#{r.id}</span>
-                <button
-                  className="bg-green-500 text-white px-1 py-0.5 rounded text-xs"
-                  onClick={() => copyOne(r.text)}
-                >
-                  Copy
-                </button>
+                <div className="space-x-1">
+                  <button
+                    className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
+                    onClick={() => runOne(r.id)}
+                  >
+                    OCR
+                  </button>
+                  <button
+                    className="bg-green-500 text-white px-1 py-0.5 rounded text-xs"
+                    onClick={() => copyOne(r.text)}
+                  >
+                    Copy
+                  </button>
+                </div>
               </div>
-              <pre className="whitespace-pre-wrap text-sm">{r.text}</pre>
+              <pre className="whitespace-pre-wrap text-sm">
+                {r.loading ? '...running...' : r.text}
+              </pre>
             </div>
           ))}
         </div>
