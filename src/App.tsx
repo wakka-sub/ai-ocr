@@ -243,9 +243,9 @@ export default function App() {
       <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow-md text-xl font-semibold">
         AI OCR Web App
       </header>
-      <div className="flex flex-1 overflow-hidden p-4 justify-center items-start gap-6">
+      <div className="flex flex-1 overflow-hidden p-6 justify-center items-start gap-8">
         <div
-          className="flex flex-col items-center p-4 space-y-4 bg-white rounded-l-xl shadow-lg flex-none"
+          className="flex flex-col items-center p-6 space-y-6 bg-white rounded-l-xl shadow-lg flex-none"
           style={{ width: image ? image.width : 'auto' }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
@@ -275,7 +275,7 @@ export default function App() {
           {rects.length === 0 && image && (
             <p className="text-sm text-gray-500">Drag to select regions.</p>
           )}
-          <div className="mt-4 w-full max-h-40 overflow-x-auto flex space-x-2">
+          <div className="mt-4 w-full max-h-40 overflow-x-auto flex space-x-4">
             {rects.length === 0 && image && (
               <p className="text-gray-500 text-sm">No selections yet.</p>
             )}
@@ -286,7 +286,7 @@ export default function App() {
                   alt={`rect ${r.id}`}
                   className="w-20 h-20 object-contain border rounded shadow"
                 />
-                <div className="mt-1 flex space-x-1">
+                <div className="mt-1 flex space-x-2">
                   <button
                     className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
                     onClick={() => rotateRect(r.id)}
@@ -304,8 +304,8 @@ export default function App() {
             ))}
           </div>
         </div>
-        <div className="w-72 flex-none p-4 bg-white rounded-r-xl shadow-lg flex flex-col overflow-y-auto">
-          <div className="mb-4 space-x-2 items-center flex">
+        <div className="w-72 flex-none p-6 bg-white rounded-r-xl shadow-lg flex flex-col overflow-y-auto">
+          <div className="mb-4 space-x-3 items-center flex">
             <button
               className="bg-blue-500 text-white px-2 py-1 rounded"
               onClick={runOCR}
@@ -350,7 +350,7 @@ export default function App() {
               </span>
             )}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-4">
             {rects.length === 0 && (
               <p className="text-gray-500 text-sm">No regions yet.</p>
             )}
@@ -358,7 +358,7 @@ export default function App() {
               <div key={r.id} className="border rounded p-2 bg-gray-50 shadow">
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-bold">#{r.id}</span>
-                  <div className="space-x-1">
+                  <div className="space-x-2">
                     <button
                       className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
                       onClick={() => runOne(r.id)}
