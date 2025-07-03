@@ -2,8 +2,7 @@
 
 @layer base {
   body {
-    color: #374151;
-    @apply antialiased;
+    @apply text-onSurface bg-surface antialiased font-sans;
   }
 }
 

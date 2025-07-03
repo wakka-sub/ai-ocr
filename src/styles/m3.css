@@ -1,0 +1,20 @@
+@layer components {
+  .transition-std {
+    @apply transition duration-200 ease-[cubic-bezier(0.2,0,0,1)];
+  }
+
+  .state-layer {
+    @apply relative overflow-hidden;
+  }
+  .state-layer::after {
+    content: '';
+    @apply absolute inset-0 bg-onPrimary opacity-0 pointer-events-none;
+    transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .state-hover:hover::after {
+    opacity: 0.08;
+  }
+  .state-pressed:active::after {
+    opacity: 0.12;
+  }
+}
