@@ -30,5 +30,7 @@ Run the unit tests with:
 ```bash
 npm test
 ```
+Ensure dependencies are installed with `npm install` before running the tests so
+that Vitest and other development packages are available.
 
 The tests download an image from i.imgur.com, so internet access is required.
