@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import './App.css'
 import { cropCanvas } from './utils/crop'
+import { getCanvasPoint } from './utils/pointer'
 
 interface Rect {
   id: number
@@ -26,6 +27,11 @@ export default function App() {
   const [counter, setCounter] = useState(1)
   const [running, setRunning] = useState(false)
   const [dragging, setDragging] = useState(false)
+  const [scale, setScale] = useState(1)
+  const [rotation, setRotation] = useState(0)
+  const pointers = useRef(new Map<number, PointerEvent>())
+  const pinchStart = useRef<{ distance: number; scale: number } | null>(null)
+  const lastTap = useRef(0)
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current
@@ -51,18 +57,16 @@ export default function App() {
     draw()
   }, [draw])
 
-  const loadFile = (file: File) => {
+  const loadFile = async (file: File) => {
+    const bitmap = await createImageBitmap(file)
+    const off = document.createElement('canvas')
+    off.width = bitmap.width
+    off.height = bitmap.height
+    off.getContext('2d')!.drawImage(bitmap, 0, 0)
     const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.onload = () => {
-      setImage(img)
-      const off = document.createElement('canvas')
-      off.width = img.width
-      off.height = img.height
-      off.getContext('2d')!.drawImage(img, 0, 0)
-      baseCanvasRef.current = off
-    }
-    img.src = URL.createObjectURL(file)
+    img.onload = () => setImage(img)
+    img.src = off.toDataURL('image/png')
+    baseCanvasRef.current = off
     setRects([])
     setCounter(1)
   }
@@ -72,11 +76,11 @@ export default function App() {
     loadFile(files[0])
   }
 
-  const startDraw = (e: React.MouseEvent) => {
+  const startDraw = (e: React.PointerEvent) => {
     if (!image) return
     const rect = canvasRef.current!.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const { x, y } = getCanvasPoint(e.nativeEvent, rect, scale)
+    pointers.current.set(e.pointerId, e.nativeEvent)
     setDrawing({
       id: counter,
       x,
@@ -88,16 +92,42 @@ export default function App() {
     })
   }
 
-  const moveDraw = (e: React.MouseEvent) => {
+  const moveDraw = (e: React.PointerEvent) => {
+    if (pointers.current.has(e.pointerId)) {
+      pointers.current.set(e.pointerId, e.nativeEvent)
+    }
+    if (pointers.current.size === 2) {
+      const [p1, p2] = Array.from(pointers.current.values())
+      const dist = Math.hypot(p1.clientX - p2.clientX, p1.clientY - p2.clientY)
+      if (!pinchStart.current) {
+        pinchStart.current = { distance: dist, scale }
+      } else {
+        setScale(
+          pinchStart.current.scale * (dist / pinchStart.current.distance),
+        )
+      }
+      return
+    }
     if (!drawing) return
     const rect = canvasRef.current!.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const { x, y } = getCanvasPoint(e.nativeEvent, rect, scale)
     setDrawing({ ...drawing, width: x - drawing.x, height: y - drawing.y })
   }
 
-  const endDraw = () => {
-    if (!drawing) return
+  const endDraw = (e: React.PointerEvent) => {
+    pointers.current.delete(e.pointerId)
+    if (pinchStart.current) {
+      pinchStart.current = null
+      return
+    }
+    if (!drawing) {
+      const now = Date.now()
+      if (now - lastTap.current < 300) {
+        setRotation((r) => (r + 90) % 360)
+      }
+      lastTap.current = now
+      return
+    }
     const finalized = {
       ...drawing,
       width: Math.abs(drawing.width),
@@ -112,10 +142,9 @@ export default function App() {
     setDrawing(null)
   }
 
-  const removeRect = (e: React.MouseEvent) => {
+  const removeRect = (e: React.PointerEvent) => {
     const rect = canvasRef.current!.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const { x, y } = getCanvasPoint(e.nativeEvent, rect, scale)
     setRects((prev) =>
       prev.filter(
         (r) =>
@@ -175,11 +204,11 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
-      if (!res.ok) {
-        const err = new Error(`HTTP ${res.status}`) as Error & { status?: number }
-        err.status = res.status
-        throw err
-      }
+    if (!res.ok) {
+      const err = new Error(`HTTP ${res.status}`) as Error & { status?: number }
+      err.status = res.status
+      throw err
+    }
     const data = await res.json()
     return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ''
   }
@@ -197,12 +226,18 @@ export default function App() {
   }
 
   const runOCR = async () => {
+    if (!navigator.onLine) {
+      alert('OCR requires internet connection.')
+      return
+    }
     setRunning(true)
     const targets = rects.filter((r) => !r.text && !r.loading)
     setRects((prev) =>
       prev.map((r) => (targets.includes(r) ? { ...r, loading: true } : r)),
     )
+    const idle = () => new Promise((res) => requestIdleCallback(res))
     const tasks = targets.map((r) => async () => {
+      await idle()
       const base = cropBase64(r)
       const text = await retry(() => fetchOCR(base))
       setRects((prev) =>
@@ -224,12 +259,18 @@ export default function App() {
   }
 
   const runOne = async (id: number) => {
+    if (!navigator.onLine) {
+      alert('OCR requires internet connection.')
+      return
+    }
     const target = rects.find((r) => r.id === id)
     if (!target) return
     setRects((prev) =>
       prev.map((r) => (r.id === id ? { ...r, loading: true } : r)),
     )
     const base = cropBase64(target)
+    const idle = () => new Promise((r) => requestIdleCallback(r))
+    await idle()
     const text = await retry(() => fetchOCR(base))
     setRects((prev) =>
       prev.map((r) => (r.id === id ? { ...r, text, loading: false } : r)),
@@ -251,7 +292,7 @@ export default function App() {
       <header className="bg-primary text-on-primary p-4 shadow-elevation-2 md-headlineSmall">
         AI OCR Web App
       </header>
-      <div className="flex flex-1 overflow-hidden p-4 gap-4">
+      <div className="flex flex-1 overflow-hidden p-4 gap-4 flex-col md:flex-row">
         <div
           className="flex-1 flex flex-col items-center p-4 space-y-4 rounded-lg shadow-elevation-1 overflow-auto drop-zone state-layer state-hover state-pressed"
           data-drag={dragging || undefined}
@@ -272,6 +313,7 @@ export default function App() {
               <input
                 type="file"
                 accept="image/*"
+                capture="environment"
                 onChange={(e) => handleFiles(e.target.files)}
                 className="hidden"
               />
@@ -279,22 +321,31 @@ export default function App() {
           )}
           <canvas
             ref={canvasRef}
-            onMouseDown={startDraw}
-            onMouseMove={moveDraw}
-            onMouseUp={endDraw}
+            onPointerDown={startDraw}
+            onPointerMove={moveDraw}
+            onPointerUp={endDraw}
+            onPointerCancel={endDraw}
             onDoubleClick={removeRect}
+            style={{ transform: `scale(${scale}) rotate(${rotation}deg)` }}
             className="border border-outline rounded-md shadow-elevation-1 flex-none transition-std"
           />
           {rects.length === 0 && image && (
-            <p className="text-bodyMedium text-on-surface-variant">Drag to select regions.</p>
+            <p className="text-bodyMedium text-on-surface-variant">
+              Drag to select regions.
+            </p>
           )}
           {image && (
             <div className="mt-4 flex flex-wrap gap-4 w-full">
               {rects.length === 0 && (
-                <p className="text-on-surface-variant text-bodyMedium">No selections yet.</p>
+                <p className="text-on-surface-variant text-bodyMedium">
+                  No selections yet.
+                </p>
               )}
               {rects.map((r) => (
-                <div key={r.id} className="flex flex-col items-center md-labelLarge animate-fadeIn">
+                <div
+                  key={r.id}
+                  className="flex flex-col items-center md-labelLarge animate-fadeIn"
+                >
                   <img
                     src={`data:image/png;base64,${r.thumb}`}
                     alt={`rect ${r.id}`}
@@ -302,16 +353,20 @@ export default function App() {
                   />
                   <div className="mt-1 flex space-x-2">
                     <button
-                      className="filled-btn state-layer state-hover state-pressed md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-center"
+                      className="filled-btn state-layer state-hover state-pressed md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-center w-11 h-11"
                       onClick={() => rotateRect(r.id)}
                     >
-                      <span className="material-symbols-rounded text-base">rotate_right</span>
+                      <span className="material-symbols-rounded text-base">
+                        rotate_right
+                      </span>
                     </button>
                     <button
-                      className="bg-danger text-on-primary px-1.5 py-0.5 rounded-md md-labelLarge focus:outline-none focus:ring-2 focus:ring-danger state-layer state-hover state-pressed transition-std flex items-center justify-center"
+                      className="bg-danger text-on-primary px-1.5 py-0.5 rounded-md md-labelLarge focus:outline-none focus:ring-2 focus:ring-danger state-layer state-hover state-pressed transition-std flex items-center justify-center w-11 h-11"
                       onClick={() => removeRectById(r.id)}
                     >
-                      <span className="material-symbols-rounded text-base">delete</span>
+                      <span className="material-symbols-rounded text-base">
+                        delete
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -319,27 +374,33 @@ export default function App() {
             </div>
           )}
         </div>
-        <div className="w-80 flex-none p-4 bg-surface rounded-lg shadow-elevation-2 flex flex-col overflow-y-auto">
+        <div className="w-full md:w-80 flex-none p-4 bg-surface rounded-lg shadow-elevation-2 flex flex-col overflow-y-auto mt-4 md:mt-0">
           <div className="mb-4 space-x-3 items-center flex">
             <button
               className="filled-btn state-layer state-hover state-pressed md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center"
               onClick={runOCR}
             >
-              <span className="material-symbols-rounded mr-1 text-base">play_arrow</span>
+              <span className="material-symbols-rounded mr-1 text-base">
+                play_arrow
+              </span>
               Run OCR
             </button>
             <button
               className="outlined-btn state-layer state-hover state-pressed md-labelLarge text-primary focus:outline-none focus:ring-2 focus:ring-primary flex items-center"
               onClick={copyResults}
             >
-              <span className="material-symbols-rounded mr-1 text-base">content_copy</span>
+              <span className="material-symbols-rounded mr-1 text-base">
+                content_copy
+              </span>
               Copy Results
             </button>
             <button
               className="text-btn state-layer state-hover state-pressed md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center"
               onClick={() => setRects([])}
             >
-              <span className="material-symbols-rounded mr-1 text-base">delete_sweep</span>
+              <span className="material-symbols-rounded mr-1 text-base">
+                delete_sweep
+              </span>
               Clear Rects
             </button>
             {running && (
@@ -370,24 +431,33 @@ export default function App() {
           </div>
           <div className="space-y-4">
             {rects.length === 0 && (
-              <p className="text-on-surface-variant text-bodyMedium">No regions yet.</p>
+              <p className="text-on-surface-variant text-bodyMedium">
+                No regions yet.
+              </p>
             )}
             {rects.map((r) => (
-              <div key={r.id} className="border border-outline rounded-md p-2 bg-surface-container-low shadow-elevation-1 animate-fadeIn">
+              <div
+                key={r.id}
+                className="border border-outline rounded-md p-2 bg-surface-container-low shadow-elevation-1 animate-fadeIn"
+              >
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-bold">#{r.id}</span>
                   <div className="space-x-2">
                     <button
-                      className="filled-btn state-layer state-hover state-pressed md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-center"
+                      className="filled-btn state-layer state-hover state-pressed md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-center w-11 h-11"
                       onClick={() => runOne(r.id)}
                     >
-                      <span className="material-symbols-rounded text-base">play_arrow</span>
+                      <span className="material-symbols-rounded text-base">
+                        play_arrow
+                      </span>
                     </button>
                     <button
-                      className="bg-success text-on-primary px-1.5 py-0.5 rounded-md md-labelLarge focus:outline-none focus:ring-2 focus:ring-success state-layer state-hover state-pressed transition-std flex items-center justify-center"
+                      className="bg-success text-on-primary px-1.5 py-0.5 rounded-md md-labelLarge focus:outline-none focus:ring-2 focus:ring-success state-layer state-hover state-pressed transition-std flex items-center justify-center w-11 h-11"
                       onClick={() => copyOne(r.text)}
                     >
-                      <span className="material-symbols-rounded text-base">content_copy</span>
+                      <span className="material-symbols-rounded text-base">
+                        content_copy
+                      </span>
                     </button>
                   </div>
                 </div>
