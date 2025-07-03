@@ -1,3 +1,20 @@
 @tailwind base;
+
+@layer base {
+  :root {
+    --primary: #6750A4;
+    --on-primary: #FFFFFF;
+    --surface: #FFFBFE;
+    --surface-container-low: #F7F2FA;
+    --inverse-surface: #313033;
+    --outline: #79747E;
+    --on-surface: #1C1B1F;
+    --on-surface-variant: #49454F;
+  }
+  body {
+    @apply text-on-surface bg-surface antialiased font-sans;
+  }
+}
+
 @tailwind components;
 @tailwind utilities;

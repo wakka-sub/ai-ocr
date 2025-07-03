@@ -25,6 +25,7 @@ export default function App() {
   const [drawing, setDrawing] = useState<Rect | null>(null)
   const [counter, setCounter] = useState(1)
   const [running, setRunning] = useState(false)
+  const [dragging, setDragging] = useState(false)
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current
@@ -247,20 +248,26 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow-md text-xl font-semibold">
+      <header className="bg-primary text-on-primary p-4 shadow-elevation-2 md-headlineSmall">
         AI OCR Web App
       </header>
       <div className="flex flex-1 overflow-hidden p-4 gap-4">
         <div
-          className="flex-1 flex flex-col items-center p-4 space-y-4 bg-white rounded-lg shadow overflow-auto"
-          onDragOver={(e) => e.preventDefault()}
+          className="flex-1 flex flex-col items-center p-4 space-y-4 rounded-md shadow-elevation-1 overflow-auto drop-zone"
+          data-drag={dragging || undefined}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragging(true)
+          }}
+          onDragLeave={() => setDragging(false)}
           onDrop={(e) => {
             e.preventDefault()
             handleFiles(e.dataTransfer.files)
+            setDragging(false)
           }}
         >
           {!image && (
-            <label className="w-64 h-32 flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 text-gray-500">
+            <label className="w-64 h-32 flex flex-col items-center justify-center drop-zone cursor-pointer">
               <span>Drop image or click to upload</span>
               <input
                 type="file"
@@ -276,35 +283,35 @@ export default function App() {
             onMouseMove={moveDraw}
             onMouseUp={endDraw}
             onDoubleClick={removeRect}
-            className="border rounded shadow flex-none"
+            className="border border-outline rounded-md shadow-elevation-1 flex-none transition-std"
           />
           {rects.length === 0 && image && (
-            <p className="text-sm text-gray-500">Drag to select regions.</p>
+            <p className="text-bodyMedium text-on-surface-variant">Drag to select regions.</p>
           )}
           {image && (
             <div className="mt-4 flex flex-wrap gap-4 w-full">
               {rects.length === 0 && (
-                <p className="text-gray-500 text-sm">No selections yet.</p>
+                <p className="text-on-surface-variant text-bodyMedium">No selections yet.</p>
               )}
               {rects.map((r) => (
-                <div key={r.id} className="flex flex-col items-center text-sm">
+                <div key={r.id} className="flex flex-col items-center md-labelLarge animate-fadeIn">
                   <img
                     src={`data:image/png;base64,${r.thumb}`}
                     alt={`rect ${r.id}`}
-                    className="w-20 h-20 object-contain border rounded shadow"
+                    className="w-20 h-20 object-contain border border-outline rounded-md shadow-elevation-1 transition-transform hover:scale-105"
                   />
                   <div className="mt-1 flex space-x-2">
                     <button
-                      className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
+                      className="filled-btn md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-center"
                       onClick={() => rotateRect(r.id)}
                     >
-                      Rotate
+                      <span className="material-symbols-rounded text-base">rotate_right</span>
                     </button>
                     <button
-                      className="bg-red-500 text-white px-1 py-0.5 rounded text-xs"
+                      className="bg-danger text-on-primary px-1.5 py-0.5 rounded-md md-labelLarge focus:outline-none focus:ring-2 focus:ring-danger state-layer state-hover state-pressed transition-std flex items-center justify-center"
                       onClick={() => removeRectById(r.id)}
                     >
-                      Delete
+                      <span className="material-symbols-rounded text-base">delete</span>
                     </button>
                   </div>
                 </div>
@@ -312,28 +319,31 @@ export default function App() {
             </div>
           )}
         </div>
-        <div className="w-80 flex-none p-4 bg-white rounded-lg shadow flex flex-col overflow-y-auto">
+        <div className="w-80 flex-none p-4 bg-surface rounded-md shadow-elevation-2 flex flex-col overflow-y-auto">
           <div className="mb-4 space-x-3 items-center flex">
             <button
-              className="bg-blue-500 text-white px-2 py-1 rounded"
+              className="filled-btn md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center"
               onClick={runOCR}
             >
+              <span className="material-symbols-rounded mr-1 text-base">play_arrow</span>
               Run OCR
             </button>
             <button
-              className="bg-green-500 text-white px-2 py-1 rounded"
+              className="outlined-btn md-labelLarge text-primary focus:outline-none focus:ring-2 focus:ring-primary flex items-center"
               onClick={copyResults}
             >
+              <span className="material-symbols-rounded mr-1 text-base">content_copy</span>
               Copy Results
             </button>
             <button
-              className="bg-gray-500 text-white px-2 py-1 rounded"
+              className="text-btn md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center"
               onClick={() => setRects([])}
             >
+              <span className="material-symbols-rounded mr-1 text-base">delete_sweep</span>
               Clear Rects
             </button>
             {running && (
-              <span className="ml-2 flex items-center text-sm text-gray-700">
+              <span className="ml-2 flex items-center text-bodyMedium text-primary">
                 <svg
                   className="w-4 h-4 mr-1 animate-spin"
                   xmlns="http://www.w3.org/2000/svg"
@@ -360,28 +370,28 @@ export default function App() {
           </div>
           <div className="space-y-4">
             {rects.length === 0 && (
-              <p className="text-gray-500 text-sm">No regions yet.</p>
+              <p className="text-on-surface-variant text-bodyMedium">No regions yet.</p>
             )}
             {rects.map((r) => (
-              <div key={r.id} className="border rounded p-2 bg-gray-50 shadow">
+              <div key={r.id} className="border border-outline rounded-md p-2 bg-surface-container-low shadow-elevation-1 animate-fadeIn">
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-bold">#{r.id}</span>
                   <div className="space-x-2">
                     <button
-                      className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
+                      className="filled-btn md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-center"
                       onClick={() => runOne(r.id)}
                     >
-                      OCR
+                      <span className="material-symbols-rounded text-base">play_arrow</span>
                     </button>
                     <button
-                      className="bg-green-500 text-white px-1 py-0.5 rounded text-xs"
+                      className="bg-success text-on-primary px-1.5 py-0.5 rounded-md md-labelLarge focus:outline-none focus:ring-2 focus:ring-success state-layer state-hover state-pressed transition-std flex items-center justify-center"
                       onClick={() => copyOne(r.text)}
                     >
-                      Copy
+                      <span className="material-symbols-rounded text-base">content_copy</span>
                     </button>
                   </div>
                 </div>
-                <pre className="whitespace-pre-wrap break-all text-sm">
+                <pre className="whitespace-pre-wrap break-all text-bodyMedium">
                   {r.loading ? '...running...' : r.text}
                 </pre>
               </div>
