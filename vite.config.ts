@@ -4,15 +4,17 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { configDefaults } from 'vitest/config'
 
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      scope: '/ai-ocr/',
       includeAssets: ['vite.svg'],
       manifest: {
         name: 'AI OCR App',
         short_name: 'AI OCR',
-        start_url: '/',
+        start_url: '/ai-ocr/',
         display: 'standalone',
         icons: [
           {

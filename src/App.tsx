@@ -315,7 +315,7 @@ export default function App() {
                 accept="image/*"
                 capture="environment"
                 onChange={(e) => handleFiles(e.target.files)}
-                className="hidden"
+                className="sr-only"
               />
             </label>
           )}
