@@ -198,9 +198,7 @@ export default function App() {
       const base = cropBase64(r)
       const text = await retry(() => fetchOCR(base))
       setRects((prev) =>
-        prev.map((p) =>
-          p.id === r.id ? { ...p, text, loading: false } : p,
-        ),
+        prev.map((p) => (p.id === r.id ? { ...p, text, loading: false } : p)),
       )
     })
     let index = 0
@@ -241,104 +239,112 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen">
-      <div
-        className="flex-1 flex flex-col items-center justify-center"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault()
-          handleFiles(e.dataTransfer.files)
-        }}
-      >
-        {!image && (
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFiles(e.target.files)}
-            className="mb-2"
-          />
-        )}
-        <canvas
-          ref={canvasRef}
-          onMouseDown={startDraw}
-          onMouseMove={moveDraw}
-          onMouseUp={endDraw}
-          onDoubleClick={removeRect}
-          className="border"
-        />
-        <div className="mt-2 w-full max-h-40 overflow-x-auto flex space-x-2">
-          {rects.map((r) => (
-            <div key={r.id} className="flex flex-col items-center text-sm">
-              <img
-                src={`data:image/png;base64,${r.thumb}`}
-                alt={`rect ${r.id}`}
-                className="w-20 h-20 object-contain border"
+    <div className="flex flex-col h-full">
+      <header className="bg-purple-600 text-white p-3 shadow">
+        AI OCR Web App
+      </header>
+      <div className="flex flex-1 overflow-hidden">
+        <div
+          className="flex-1 flex flex-col items-center justify-center p-4 space-y-2 bg-white rounded-l-lg shadow"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault()
+            handleFiles(e.dataTransfer.files)
+          }}
+        >
+          {!image && (
+            <label className="w-64 h-32 flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer bg-white text-gray-500">
+              <span>Drop image or click to upload</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFiles(e.target.files)}
+                className="hidden"
               />
-              <div className="mt-1 flex space-x-1">
-                <button
-                  className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
-                  onClick={() => rotateRect(r.id)}
-                >
-                  Rotate
-                </button>
-                <button
-                  className="bg-red-500 text-white px-1 py-0.5 rounded text-xs"
-                  onClick={() => removeRectById(r.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="w-64 border-l p-2 flex flex-col overflow-y-auto">
-        <div className="mb-2 space-x-2 items-center flex">
-          <button
-            className="bg-blue-500 text-white px-2 py-1 rounded"
-            onClick={runOCR}
-          >
-            Run OCR
-          </button>
-          <button
-            className="bg-green-500 text-white px-2 py-1 rounded"
-            onClick={copyResults}
-          >
-            Copy Results
-          </button>
-          <button
-            className="bg-gray-500 text-white px-2 py-1 rounded"
-            onClick={() => setRects([])}
-          >
-            Clear Rects
-          </button>
-          {running && <span className="ml-2 text-sm">Running...</span>}
-        </div>
-        <div className="space-y-2">
-          {rects.map((r) => (
-            <div key={r.id} className="border p-1">
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-bold">#{r.id}</span>
-                <div className="space-x-1">
+            </label>
+          )}
+          <canvas
+            ref={canvasRef}
+            onMouseDown={startDraw}
+            onMouseMove={moveDraw}
+            onMouseUp={endDraw}
+            onDoubleClick={removeRect}
+            className="border rounded shadow"
+          />
+          <div className="mt-2 w-full max-h-40 overflow-x-auto flex space-x-2">
+            {rects.map((r) => (
+              <div key={r.id} className="flex flex-col items-center text-sm">
+                <img
+                  src={`data:image/png;base64,${r.thumb}`}
+                  alt={`rect ${r.id}`}
+                  className="w-20 h-20 object-contain border rounded shadow"
+                />
+                <div className="mt-1 flex space-x-1">
                   <button
                     className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
-                    onClick={() => runOne(r.id)}
+                    onClick={() => rotateRect(r.id)}
                   >
-                    OCR
+                    Rotate
                   </button>
                   <button
-                    className="bg-green-500 text-white px-1 py-0.5 rounded text-xs"
-                    onClick={() => copyOne(r.text)}
+                    className="bg-red-500 text-white px-1 py-0.5 rounded text-xs"
+                    onClick={() => removeRectById(r.id)}
                   >
-                    Copy
+                    Delete
                   </button>
                 </div>
               </div>
-              <pre className="whitespace-pre-wrap text-sm">
-                {r.loading ? '...running...' : r.text}
-              </pre>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+        <div className="w-64 p-4 bg-white shadow rounded-r-lg flex flex-col overflow-y-auto">
+          <div className="mb-4 space-x-2 items-center flex">
+            <button
+              className="bg-blue-500 text-white px-2 py-1 rounded"
+              onClick={runOCR}
+            >
+              Run OCR
+            </button>
+            <button
+              className="bg-green-500 text-white px-2 py-1 rounded"
+              onClick={copyResults}
+            >
+              Copy Results
+            </button>
+            <button
+              className="bg-gray-500 text-white px-2 py-1 rounded"
+              onClick={() => setRects([])}
+            >
+              Clear Rects
+            </button>
+            {running && <span className="ml-2 text-sm">Running...</span>}
+          </div>
+          <div className="space-y-2">
+            {rects.map((r) => (
+              <div key={r.id} className="border rounded p-2 bg-gray-50 shadow">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-bold">#{r.id}</span>
+                  <div className="space-x-1">
+                    <button
+                      className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
+                      onClick={() => runOne(r.id)}
+                    >
+                      OCR
+                    </button>
+                    <button
+                      className="bg-green-500 text-white px-1 py-0.5 rounded text-xs"
+                      onClick={() => copyOne(r.text)}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+                <pre className="whitespace-pre-wrap text-sm">
+                  {r.loading ? '...running...' : r.text}
+                </pre>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
