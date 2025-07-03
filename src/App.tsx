@@ -174,6 +174,11 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
+      if (!res.ok) {
+        const err = new Error(`HTTP ${res.status}`) as Error & { status?: number }
+        err.status = res.status
+        throw err
+      }
     const data = await res.json()
     return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ''
   }
@@ -183,7 +188,10 @@ export default function App() {
       return await fn()
     } catch (e) {
       if (retries === 0) throw e
-      await new Promise((r) => setTimeout(r, (2 - retries) * 500 + 500))
+      const status = (e as { status?: number } | undefined)?.status
+      const base = status === 429 ? 2000 : 1000
+      const delay = base * Math.pow(2, 2 - retries)
+      await new Promise((r) => setTimeout(r, delay))
       return retry(fn, retries - 1)
     }
   }
@@ -274,6 +282,36 @@ export default function App() {
           {rects.length === 0 && image && (
             <p className="text-sm text-gray-500">Drag to select regions.</p>
           )}
+          {image && (
+            <div className="mt-4 flex flex-wrap gap-4 w-full">
+              {rects.length === 0 && (
+                <p className="text-gray-500 text-sm">No selections yet.</p>
+              )}
+              {rects.map((r) => (
+                <div key={r.id} className="flex flex-col items-center text-sm">
+                  <img
+                    src={`data:image/png;base64,${r.thumb}`}
+                    alt={`rect ${r.id}`}
+                    className="w-20 h-20 object-contain border rounded shadow"
+                  />
+                  <div className="mt-1 flex space-x-2">
+                    <button
+                      className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
+                      onClick={() => rotateRect(r.id)}
+                    >
+                      Rotate
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-1 py-0.5 rounded text-xs"
+                      onClick={() => removeRectById(r.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className="w-80 flex-none p-4 bg-white rounded-lg shadow flex flex-col overflow-y-auto">
           <div className="mb-4 space-x-3 items-center flex">
@@ -352,36 +390,6 @@ export default function App() {
           </div>
         </div>
       </div>
-      {image && (
-        <div className="p-4 flex flex-wrap gap-4">
-          {rects.length === 0 && (
-            <p className="text-gray-500 text-sm">No selections yet.</p>
-          )}
-          {rects.map((r) => (
-            <div key={r.id} className="flex flex-col items-center text-sm">
-              <img
-                src={`data:image/png;base64,${r.thumb}`}
-                alt={`rect ${r.id}`}
-                className="w-20 h-20 object-contain border rounded shadow"
-              />
-              <div className="mt-1 flex space-x-2">
-                <button
-                  className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
-                  onClick={() => rotateRect(r.id)}
-                >
-                  Rotate
-                </button>
-                <button
-                  className="bg-red-500 text-white px-1 py-0.5 rounded text-xs"
-                  onClick={() => removeRectById(r.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   )
 }
