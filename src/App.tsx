@@ -247,7 +247,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow-md text-xl font-semibold">
+      <header className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 shadow-md text-xl font-semibold">
         AI OCR Web App
       </header>
       <div className="flex flex-1 overflow-hidden p-4 gap-4">
@@ -260,7 +260,7 @@ export default function App() {
           }}
         >
           {!image && (
-            <label className="w-64 h-32 flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 text-gray-500">
+            <label className="w-64 h-32 flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors">
               <span>Drop image or click to upload</span>
               <input
                 type="file"
@@ -276,7 +276,7 @@ export default function App() {
             onMouseMove={moveDraw}
             onMouseUp={endDraw}
             onDoubleClick={removeRect}
-            className="border rounded shadow flex-none"
+            className="border rounded shadow flex-none transition"
           />
           {rects.length === 0 && image && (
             <p className="text-sm text-gray-500">Drag to select regions.</p>
@@ -287,21 +287,21 @@ export default function App() {
                 <p className="text-gray-500 text-sm">No selections yet.</p>
               )}
               {rects.map((r) => (
-                <div key={r.id} className="flex flex-col items-center text-sm">
+                <div key={r.id} className="flex flex-col items-center text-sm animate-fadeIn">
                   <img
                     src={`data:image/png;base64,${r.thumb}`}
                     alt={`rect ${r.id}`}
-                    className="w-20 h-20 object-contain border rounded shadow"
+                    className="w-20 h-20 object-contain border rounded shadow transition-transform hover:scale-105"
                   />
                   <div className="mt-1 flex space-x-2">
                     <button
-                      className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-1.5 py-0.5 rounded-md text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       onClick={() => rotateRect(r.id)}
                     >
                       Rotate
                     </button>
                     <button
-                      className="bg-red-500 text-white px-1 py-0.5 rounded text-xs"
+                      className="bg-rose-500 hover:bg-rose-600 text-white px-1.5 py-0.5 rounded-md text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-rose-400"
                       onClick={() => removeRectById(r.id)}
                     >
                       Delete
@@ -312,22 +312,22 @@ export default function App() {
             </div>
           )}
         </div>
-        <div className="w-80 flex-none p-4 bg-white rounded-lg shadow flex flex-col overflow-y-auto">
+        <div className="w-80 flex-none p-4 bg-white rounded-lg shadow-lg flex flex-col overflow-y-auto">
           <div className="mb-4 space-x-3 items-center flex">
             <button
-              className="bg-blue-500 text-white px-2 py-1 rounded"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400"
               onClick={runOCR}
             >
               Run OCR
             </button>
             <button
-              className="bg-green-500 text-white px-2 py-1 rounded"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400"
               onClick={copyResults}
             >
               Copy Results
             </button>
             <button
-              className="bg-gray-500 text-white px-2 py-1 rounded"
+              className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
               onClick={() => setRects([])}
             >
               Clear Rects
@@ -363,18 +363,18 @@ export default function App() {
               <p className="text-gray-500 text-sm">No regions yet.</p>
             )}
             {rects.map((r) => (
-              <div key={r.id} className="border rounded p-2 bg-gray-50 shadow">
+              <div key={r.id} className="border rounded p-2 bg-gray-50 shadow animate-fadeIn">
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-bold">#{r.id}</span>
                   <div className="space-x-2">
                     <button
-                      className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-1.5 py-0.5 rounded-md text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       onClick={() => runOne(r.id)}
                     >
                       OCR
                     </button>
                     <button
-                      className="bg-green-500 text-white px-1 py-0.5 rounded text-xs"
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-1.5 py-0.5 rounded-md text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400"
                       onClick={() => copyOne(r.text)}
                     >
                       Copy
