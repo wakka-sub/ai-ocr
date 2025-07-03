@@ -239,13 +239,13 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <header className="bg-purple-600 text-white p-3 shadow">
+    <div className="min-h-screen flex flex-col">
+      <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow-md text-xl font-semibold">
         AI OCR Web App
       </header>
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden p-4 justify-center">
         <div
-          className="flex-1 flex flex-col items-center justify-center p-4 space-y-2 bg-white rounded-l-lg shadow"
+          className="flex-1 flex flex-col items-center p-4 space-y-3 bg-white rounded-l-xl shadow-lg"
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault()
@@ -253,7 +253,7 @@ export default function App() {
           }}
         >
           {!image && (
-            <label className="w-64 h-32 flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer bg-white text-gray-500">
+            <label className="w-64 h-32 flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 text-gray-500">
               <span>Drop image or click to upload</span>
               <input
                 type="file"
@@ -271,7 +271,13 @@ export default function App() {
             onDoubleClick={removeRect}
             className="border rounded shadow"
           />
+          {rects.length === 0 && image && (
+            <p className="text-sm text-gray-500">Drag to select regions.</p>
+          )}
           <div className="mt-2 w-full max-h-40 overflow-x-auto flex space-x-2">
+            {rects.length === 0 && image && (
+              <p className="text-gray-500 text-sm">No selections yet.</p>
+            )}
             {rects.map((r) => (
               <div key={r.id} className="flex flex-col items-center text-sm">
                 <img
@@ -297,7 +303,7 @@ export default function App() {
             ))}
           </div>
         </div>
-        <div className="w-64 p-4 bg-white shadow rounded-r-lg flex flex-col overflow-y-auto">
+        <div className="w-72 p-4 bg-white rounded-r-xl shadow-lg flex flex-col overflow-y-auto">
           <div className="mb-4 space-x-2 items-center flex">
             <button
               className="bg-blue-500 text-white px-2 py-1 rounded"
@@ -317,9 +323,36 @@ export default function App() {
             >
               Clear Rects
             </button>
-            {running && <span className="ml-2 text-sm">Running...</span>}
+            {running && (
+              <span className="ml-2 flex items-center text-sm text-gray-700">
+                <svg
+                  className="w-4 h-4 mr-1 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+                Running...
+              </span>
+            )}
           </div>
           <div className="space-y-2">
+            {rects.length === 0 && (
+              <p className="text-gray-500 text-sm">No regions yet.</p>
+            )}
             {rects.map((r) => (
               <div key={r.id} className="border rounded p-2 bg-gray-50 shadow">
                 <div className="flex justify-between items-center mb-1">
