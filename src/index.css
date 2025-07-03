@@ -2,18 +2,19 @@
 
 @layer base {
   :root {
-    --primary: #6750A4;
-    --on-primary: #FFFFFF;
-    --surface: #FFFBFE;
-    --surface-container-low: #F7F2FA;
-    --inverse-surface: #313033;
-    --outline: #79747E;
-    --on-surface: #1C1B1F;
-    --on-surface-variant: #49454F;
+    --md-sys-color-primary: #6750A4;
+    --md-sys-color-on-primary: #FFFFFF;
+    --md-sys-color-surface: #FFFBFE;
+    --md-sys-color-surface-container-low: #F7F2FA;
+    --md-sys-color-surface-variant: #E7E0EC;
+    --md-sys-color-inverse-surface: #313033;
+    --md-sys-color-outline: #79747E;
+    --md-sys-color-on-surface: #1C1B1F;
+    --md-sys-color-on-surface-variant: #49454F;
   }
   body {
-    color: rgb(var(--on-surface));
-    background: rgb(var(--surface));
+    color: rgb(var(--md-sys-color-on-surface));
+    background: rgb(var(--md-sys-color-surface));
     font-family: 'Roboto', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }

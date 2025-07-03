@@ -5,16 +5,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: 'rgb(var(--primary) / <alpha-value>)',
-        surface: 'rgb(var(--surface) / <alpha-value>)',
-        'surface-container-low': 'rgb(var(--surface-container-low) / <alpha-value>)',
-        'inverse-surface': 'rgb(var(--inverse-surface) / <alpha-value>)',
-        outline: 'rgb(var(--outline) / <alpha-value>)',
-        on: {
-          primary: 'rgb(var(--on-primary) / <alpha-value>)',
-          surface: 'rgb(var(--on-surface) / <alpha-value>)',
-          surfaceVariant: 'rgb(var(--on-surface-variant) / <alpha-value>)',
-        },
+        primary: 'rgb(var(--md-sys-color-primary) / <alpha-value>)',
+        'on-primary': 'rgb(var(--md-sys-color-on-primary) / <alpha-value>)',
+        surface: 'rgb(var(--md-sys-color-surface) / <alpha-value>)',
+        'surface-container-low': 'rgb(var(--md-sys-color-surface-container-low) / <alpha-value>)',
+        'surface-variant': 'rgb(var(--md-sys-color-surface-variant) / <alpha-value>)',
+        'inverse-surface': 'rgb(var(--md-sys-color-inverse-surface) / <alpha-value>)',
+        outline: 'rgb(var(--md-sys-color-outline) / <alpha-value>)',
+        'on-surface': 'rgb(var(--md-sys-color-on-surface) / <alpha-value>)',
+        'on-surface-variant': 'rgb(var(--md-sys-color-on-surface-variant) / <alpha-value>)',
         success: colors.emerald,
         danger: colors.rose,
       },

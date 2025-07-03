@@ -10,7 +10,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--on-primary);
+    background: var(--md-sys-color-on-primary);
     opacity: 0;
     pointer-events: none;
     transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1);
@@ -33,38 +33,38 @@
     font-weight: 500;
   }
   .filled-btn {
-    background: rgb(var(--primary));
-    color: rgb(var(--on-primary));
+    background: rgb(var(--md-sys-color-primary));
+    color: rgb(var(--md-sys-color-on-primary));
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
     border-radius: 8px;
     padding: 0.25rem 1rem;
     transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   }
   .outlined-btn {
-    border: 1px solid rgb(var(--primary));
-    color: rgb(var(--primary));
+    border: 1px solid rgb(var(--md-sys-color-outline));
+    color: rgb(var(--md-sys-color-primary));
     border-radius: 8px;
     padding: 0.25rem 1rem;
     transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   }
   .text-btn {
-    color: rgb(var(--primary));
+    color: rgb(var(--md-sys-color-primary));
     border-radius: 8px;
     padding: 0.25rem 1rem;
     transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   }
   .drop-zone {
-    border: 1px solid rgb(var(--outline));
-    background: rgb(var(--surface-container-low));
-    color: rgb(var(--on-surface-variant));
-    border-radius: 8px;
+    border: 1px solid rgb(var(--md-sys-color-outline));
+    background: rgb(var(--md-sys-color-surface-container-low));
+    color: rgb(var(--md-sys-color-on-surface-variant));
+    border-radius: 12px;
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
     padding: 1.5rem;
     text-align: center;
     transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   }
   .drop-zone[data-drag='true'] {
-    border-color: rgb(var(--primary));
-    background: rgb(var(--inverse-surface));
+    border-color: rgb(var(--md-sys-color-primary));
+    background: rgb(var(--md-sys-color-inverse-surface));
   }
 }

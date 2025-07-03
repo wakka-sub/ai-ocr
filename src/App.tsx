@@ -253,7 +253,7 @@ export default function App() {
       </header>
       <div className="flex flex-1 overflow-hidden p-4 gap-4">
         <div
-          className="flex-1 flex flex-col items-center p-4 space-y-4 rounded-md shadow-elevation-1 overflow-auto drop-zone state-layer state-hover state-pressed"
+          className="flex-1 flex flex-col items-center p-4 space-y-4 rounded-lg shadow-elevation-1 overflow-auto drop-zone state-layer state-hover state-pressed"
           data-drag={dragging || undefined}
           onDragOver={(e) => {
             e.preventDefault()
@@ -286,12 +286,12 @@ export default function App() {
             className="border border-outline rounded-md shadow-elevation-1 flex-none transition-std"
           />
           {rects.length === 0 && image && (
-            <p className="text-bodyMedium text-on-surfaceVariant">Drag to select regions.</p>
+            <p className="text-bodyMedium text-on-surface-variant">Drag to select regions.</p>
           )}
           {image && (
             <div className="mt-4 flex flex-wrap gap-4 w-full">
               {rects.length === 0 && (
-                <p className="text-on-surfaceVariant text-bodyMedium">No selections yet.</p>
+                <p className="text-on-surface-variant text-bodyMedium">No selections yet.</p>
               )}
               {rects.map((r) => (
                 <div key={r.id} className="flex flex-col items-center md-labelLarge animate-fadeIn">
@@ -319,7 +319,7 @@ export default function App() {
             </div>
           )}
         </div>
-        <div className="w-80 flex-none p-4 bg-surface rounded-md shadow-elevation-2 flex flex-col overflow-y-auto">
+        <div className="w-80 flex-none p-4 bg-surface rounded-lg shadow-elevation-2 flex flex-col overflow-y-auto">
           <div className="mb-4 space-x-3 items-center flex">
             <button
               className="filled-btn state-layer state-hover state-pressed md-labelLarge focus:outline-none focus:ring-2 focus:ring-primary flex items-center"
@@ -370,7 +370,7 @@ export default function App() {
           </div>
           <div className="space-y-4">
             {rects.length === 0 && (
-              <p className="text-on-surfaceVariant text-bodyMedium">No regions yet.</p>
+              <p className="text-on-surface-variant text-bodyMedium">No regions yet.</p>
             )}
             {rects.map((r) => (
               <div key={r.id} className="border border-outline rounded-md p-2 bg-surface-container-low shadow-elevation-1 animate-fadeIn">
