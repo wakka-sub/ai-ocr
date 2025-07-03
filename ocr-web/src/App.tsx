@@ -22,11 +22,6 @@ export default function App() {
   const [drawing, setDrawing] = useState<Rect | null>(null)
   const [counter, setCounter] = useState(1)
 
-  // redraw when image or rectangles change
-  useEffect(() => {
-    draw()
-  }, [draw])
-
   const draw = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !image) return
@@ -45,6 +40,11 @@ export default function App() {
       ctx.fillText(String(r.id), r.x + 4, r.y + 16)
     })
   }, [image, rects, drawing])
+
+  // redraw when image or rectangles change
+  useEffect(() => {
+    draw()
+  }, [draw])
 
   const loadFile = (file: File) => {
     const img = new Image()
