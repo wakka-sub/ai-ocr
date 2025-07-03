@@ -1,18 +1,20 @@
 import colors from 'tailwindcss/colors'
 
 export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  content: ['./index.html', './src/**/*.{ts,tsx,css}'],
   theme: {
     extend: {
       colors: {
         primary: 'rgb(var(--primary) / <alpha-value>)',
-        'on-primary': 'rgb(var(--on-primary) / <alpha-value>)',
         surface: 'rgb(var(--surface) / <alpha-value>)',
         'surface-container-low': 'rgb(var(--surface-container-low) / <alpha-value>)',
         'inverse-surface': 'rgb(var(--inverse-surface) / <alpha-value>)',
         outline: 'rgb(var(--outline) / <alpha-value>)',
-        'on-surface': 'rgb(var(--on-surface) / <alpha-value>)',
-        'on-surface-variant': 'rgb(var(--on-surface-variant) / <alpha-value>)',
+        on: {
+          primary: 'rgb(var(--on-primary) / <alpha-value>)',
+          surface: 'rgb(var(--on-surface) / <alpha-value>)',
+          surfaceVariant: 'rgb(var(--on-surface-variant) / <alpha-value>)',
+        },
         success: colors.emerald,
         danger: colors.rose,
       },

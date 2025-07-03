@@ -23,24 +23,48 @@
   }
 
   .md-headlineSmall {
-    @apply text-headline-small;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
   }
   .md-labelLarge {
-    @apply text-label-large;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
   }
   .filled-btn {
-    @apply bg-primary text-on-primary shadow-elevation-1 rounded-md px-4 py-1 state-layer state-hover state-pressed transition-std;
+    background: rgb(var(--primary));
+    color: rgb(var(--on-primary));
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 0.25rem 1rem;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   }
   .outlined-btn {
-    @apply border border-primary text-primary rounded-md px-4 py-1 state-layer state-hover state-pressed transition-std;
+    border: 1px solid rgb(var(--primary));
+    color: rgb(var(--primary));
+    border-radius: 8px;
+    padding: 0.25rem 1rem;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   }
   .text-btn {
-    @apply text-primary rounded-md px-4 py-1 state-layer state-hover state-pressed transition-std;
+    color: rgb(var(--primary));
+    border-radius: 8px;
+    padding: 0.25rem 1rem;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   }
   .drop-zone {
-    @apply border border-outline rounded-md shadow-elevation-1 bg-surface-container-low p-6 text-center text-on-surface-variant transition-std state-layer state-hover state-pressed;
+    border: 1px solid rgb(var(--outline));
+    background: rgb(var(--surface-container-low));
+    color: rgb(var(--on-surface-variant));
+    border-radius: 8px;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   }
   .drop-zone[data-drag='true'] {
-    @apply border-primary bg-inverse-surface;
+    border-color: rgb(var(--primary));
+    background: rgb(var(--inverse-surface));
   }
 }

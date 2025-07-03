@@ -12,7 +12,10 @@
     --on-surface-variant: #49454F;
   }
   body {
-    @apply text-on-surface bg-surface antialiased font-sans;
+    color: rgb(var(--on-surface));
+    background: rgb(var(--surface));
+    font-family: 'Roboto', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
