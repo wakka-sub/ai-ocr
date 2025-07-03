@@ -20,6 +20,7 @@ const promptText =
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const baseCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [rects, setRects] = useState<Rect[]>([])
   const [drawing, setDrawing] = useState<Rect | null>(null)
@@ -250,7 +251,7 @@ export default function App() {
       <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow-md text-xl font-semibold">
         AI OCR Web App
       </header>
-      <div className="flex flex-1 overflow-hidden p-4 gap-4">
+      <div className="flex flex-1 overflow-hidden p-4 gap-4 flex-col md:flex-row">
         <div
           className="flex-1 flex flex-col items-center p-4 space-y-4 bg-white rounded-lg shadow overflow-auto"
           onDragOver={(e) => e.preventDefault()}
@@ -260,15 +261,31 @@ export default function App() {
           }}
         >
           {!image && (
-            <label className="w-64 h-32 flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 text-gray-500">
-              <span>Drop image or click to upload</span>
+            <div className="space-y-2 flex flex-col items-center">
+              <label className="w-64 h-32 flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 text-gray-500">
+                <span>Drop image or tap to upload</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFiles(e.target.files)}
+                  className="hidden"
+                />
+              </label>
+              <button
+                className="bg-blue-500 text-white px-2 py-1 rounded"
+                onClick={() => photoInputRef.current?.click()}
+              >
+                Take Photo
+              </button>
               <input
+                ref={photoInputRef}
                 type="file"
                 accept="image/*"
+                capture="environment"
                 onChange={(e) => handleFiles(e.target.files)}
                 className="hidden"
               />
-            </label>
+            </div>
           )}
           <canvas
             ref={canvasRef}
@@ -276,7 +293,7 @@ export default function App() {
             onMouseMove={moveDraw}
             onMouseUp={endDraw}
             onDoubleClick={removeRect}
-            className="border rounded shadow flex-none"
+            className="border rounded shadow flex-none max-w-full w-full h-auto"
           />
           {rects.length === 0 && image && (
             <p className="text-sm text-gray-500">Drag to select regions.</p>
@@ -312,7 +329,7 @@ export default function App() {
             </div>
           )}
         </div>
-        <div className="w-80 flex-none p-4 bg-white rounded-lg shadow flex flex-col overflow-y-auto">
+        <div className="w-full md:w-80 flex-none p-4 bg-white rounded-lg shadow flex flex-col overflow-y-auto">
           <div className="mb-4 space-x-3 items-center flex">
             <button
               className="bg-blue-500 text-white px-2 py-1 rounded"
