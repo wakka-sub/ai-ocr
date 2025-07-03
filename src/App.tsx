@@ -9,6 +9,7 @@ interface Rect {
   width: number
   height: number
   rotation: number
+  thumb: string
   text?: string
 }
 
@@ -78,16 +79,16 @@ export default function App() {
 
   const endDraw = () => {
     if (!drawing) return
-    setRects([
-      ...rects,
-      {
-        ...drawing,
-        width: Math.abs(drawing.width),
-        height: Math.abs(drawing.height),
-        x: Math.min(drawing.x, drawing.x + drawing.width),
-        y: Math.min(drawing.y, drawing.y + drawing.height)
-      }
-    ])
+    const finalized = {
+      ...drawing,
+      width: Math.abs(drawing.width),
+      height: Math.abs(drawing.height),
+      x: Math.min(drawing.x, drawing.x + drawing.width),
+      y: Math.min(drawing.y, drawing.y + drawing.height),
+      rotation: 0,
+    }
+    const thumb = cropBase64(finalized)
+    setRects([...rects, { ...finalized, thumb }])
     setCounter(counter + 1)
     setDrawing(null)
   }
@@ -96,14 +97,21 @@ export default function App() {
     const rect = canvasRef.current!.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    setRects((prev) => prev.filter((r) => !(x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height)))
+    setRects((prev) =>
+      prev.filter(
+        (r) =>
+          !(x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height),
+      ),
+    )
   }
 
   const rotateRect = (id: number) => {
     setRects((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, rotation: (r.rotation + 90) % 360 } : r
-      )
+      prev.map((r) => {
+        if (r.id !== id) return r
+        const rotated = { ...r, rotation: (r.rotation + 90) % 360 }
+        return { ...rotated, thumb: cropBase64(rotated) }
+      }),
     )
   }
 
@@ -111,7 +119,13 @@ export default function App() {
     setRects((prev) => prev.filter((r) => r.id !== id))
   }
 
-  const cropBase64 = (r: Rect) => {
+  const cropBase64 = (r: {
+    x: number
+    y: number
+    width: number
+    height: number
+    rotation: number
+  }) => {
     const canvas = canvasRef.current!
     return cropCanvas(canvas, r.x, r.y, r.width, r.height, r.rotation)
   }
@@ -136,9 +150,7 @@ export default function App() {
       body: JSON.stringify(body),
     })
     const data = await res.json()
-    return (
-      data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ''
-    )
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ''
   }
 
   const retry = async <T,>(fn: () => Promise<T>, retries = 2): Promise<T> => {
@@ -158,18 +170,26 @@ export default function App() {
       setRects((prev) => prev.map((p) => (p.id === r.id ? { ...p, text } : p)))
     })
     let index = 0
-    const workers = Array.from({ length: Math.min(5, tasks.length) }, async () => {
-      while (index < tasks.length) {
-        const current = tasks[index++]
-        await current()
-      }
-    })
+    const workers = Array.from(
+      { length: Math.min(5, tasks.length) },
+      async () => {
+        while (index < tasks.length) {
+          const current = tasks[index++]
+          await current()
+        }
+      },
+    )
     await Promise.all(workers)
   }
 
   const copyResults = async () => {
     const txt = rects.map((r) => r.text || '').join('\n')
     await navigator.clipboard.writeText(txt)
+  }
+
+  const copyOne = async (text?: string) => {
+    if (!text) return
+    await navigator.clipboard.writeText(text)
   }
 
   return (
@@ -198,11 +218,15 @@ export default function App() {
           onDoubleClick={removeRect}
           className="border"
         />
-        <div className="mt-2 w-full max-h-40 overflow-y-auto space-y-1">
+        <div className="mt-2 w-full max-h-40 overflow-x-auto flex space-x-2">
           {rects.map((r) => (
-            <div key={r.id} className="flex items-center justify-between text-sm">
-              <span>#{r.id}</span>
-              <div className="space-x-1">
+            <div key={r.id} className="flex flex-col items-center text-sm">
+              <img
+                src={`data:image/png;base64,${r.thumb}`}
+                alt={`rect ${r.id}`}
+                className="w-20 h-20 object-contain border"
+              />
+              <div className="mt-1 flex space-x-1">
                 <button
                   className="bg-purple-500 text-white px-1 py-0.5 rounded text-xs"
                   onClick={() => rotateRect(r.id)}
@@ -244,7 +268,15 @@ export default function App() {
         <div className="space-y-2">
           {rects.map((r) => (
             <div key={r.id} className="border p-1">
-              <span className="font-bold">#{r.id}</span>
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-bold">#{r.id}</span>
+                <button
+                  className="bg-green-500 text-white px-1 py-0.5 rounded text-xs"
+                  onClick={() => copyOne(r.text)}
+                >
+                  Copy
+                </button>
+              </div>
               <pre className="whitespace-pre-wrap text-sm">{r.text}</pre>
             </div>
           ))}

@@ -2,7 +2,7 @@
 
 This project is a React + TypeScript + Vite application that performs client-side image cropping and parallel OCR using the Gemini 2.5 Flash API.
 
-Each cropped region can be rotated in 90° steps before sending to the Gemini API. Selected areas are listed below the canvas where they can be rotated or deleted. OCR results appear in the right panel and can be copied with one click.
+Each cropped region can be rotated in 90° steps before sending to the Gemini API. Thumbnails of the selected areas are shown below the canvas from left to right, each with rotate and delete controls. OCR results appear in the right panel where each block has its own copy button along with a global copy-all control.
 
 ## Development
 
@@ -24,4 +24,5 @@ Run the unit tests with:
 ```bash
 npm test
 ```
+
 The tests download an image from i.imgur.com, so internet access is required.
