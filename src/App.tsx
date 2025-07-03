@@ -243,9 +243,9 @@ export default function App() {
       <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow-md text-xl font-semibold">
         AI OCR Web App
       </header>
-      <div className="flex flex-1 overflow-hidden p-4 justify-center">
+      <div className="flex flex-1 overflow-hidden p-4 justify-center gap-4">
         <div
-          className="flex-1 flex flex-col items-center p-4 space-y-3 bg-white rounded-l-xl shadow-lg"
+          className="flex-1 flex flex-col items-center p-4 space-y-4 bg-white rounded-l-xl shadow-lg"
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault()
@@ -269,12 +269,12 @@ export default function App() {
             onMouseMove={moveDraw}
             onMouseUp={endDraw}
             onDoubleClick={removeRect}
-            className="border rounded shadow"
+            className="border rounded shadow flex-none"
           />
           {rects.length === 0 && image && (
             <p className="text-sm text-gray-500">Drag to select regions.</p>
           )}
-          <div className="mt-2 w-full max-h-40 overflow-x-auto flex space-x-2">
+          <div className="mt-4 w-full max-h-40 overflow-x-auto flex space-x-2">
             {rects.length === 0 && image && (
               <p className="text-gray-500 text-sm">No selections yet.</p>
             )}
